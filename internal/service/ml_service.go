@@ -26,22 +26,43 @@ func SearchProducts(query string) ([]Produto, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("API retornou um status inesperado: %d", resp.StatusCode)
+		return nil, fmt.Errorf("falha ao buscar produtos, status: %d", resp.StatusCode)
+	}
+
 	var result map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		log.Printf("Erro ao decodificar resposta: %v", err)
 		return nil, err
 	}
 
-	items := result["results"].([]interface{})
+	items, ok := result["results"].([]interface{})
+	if !ok {
+		log.Printf("Formato inesperado no campo 'results'")
+		return nil, fmt.Errorf("formato inesperado no campo 'results'")
+	}
+
 	var produtos []Produto
 	for _, item := range items {
-		data := item.(map[string]interface{})
+		data, ok := item.(map[string]interface{})
+		if !ok {
+			log.Printf("Formato inesperado no item do produto")
+			continue
+		}
+
+		id, _ := data["id"].(string)
+		title, _ := data["title"].(string)
+		price, _ := data["price"].(float64)
+		thumbnail, _ := data["thumbnail"].(string)
+		permalink, _ := data["permalink"].(string)
+
 		produtos = append(produtos, Produto{
-			ID:        data["id"].(string),
-			Title:     data["title"].(string),
-			Price:     data["price"].(float64),
-			Thumbnail: data["thumbnail"].(string),
-			Permalink: data["permalink"].(string),
+			ID:        id,
+			Title:     title,
+			Price:     price,
+			Thumbnail: thumbnail,
+			Permalink: permalink,
 		})
 	}
 
