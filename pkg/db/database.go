@@ -1,22 +1,26 @@
 package db
 
 import (
-	"log"
-	"os"
+    "log"
+    "os"
 
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+    "gorm.io/driver/mysql"
+    "gorm.io/gorm"
 )
 
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	dsn := os.Getenv("DB_DSN")
-	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("Falha ao conectar ao banco de dados: %v", err)
-	}
+    dsn := os.Getenv("DB_DSN")
+    if dsn == "" {
+        log.Fatal("DSN do banco de dados não foi encontrado no arquivo .env")
+    }
 
-	DB = database
-	log.Println("Banco de dados conectado com sucesso!")
+    database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+    if err != nil {
+        log.Fatalf("Falha ao conectar ao banco de dados: %v", err)
+    }
+
+    DB = database
+    log.Println("Conexão ao banco de dados bem-sucedida!")
 }

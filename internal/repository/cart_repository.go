@@ -6,9 +6,9 @@ import (
 )
 
 func GetCart() ([]model.CartItem, error) {
-	var cart []model.CartItem
-	err := db.DB.Find(&cart).Error
-	return cart, err
+	var cartItems []model.CartItem
+	err := db.DB.Find(&cartItems).Error
+	return cartItems, err
 }
 
 func AddToCart(item model.CartItem) error {
